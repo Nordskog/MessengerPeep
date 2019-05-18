@@ -120,7 +120,7 @@ public class ThriftParser
 							}
 						}
 
-						ThriftField newField = new ThriftField("", field.id, field.type, map, map.keyType, map.valueType );
+						ThriftField newField = new ThriftField("", field.id, field.type, newMap, map.keyType, map.valueType );
 						thriftObject.addField(newField);
 
 						prot.readMapEnd();
