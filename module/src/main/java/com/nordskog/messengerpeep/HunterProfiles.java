@@ -557,7 +557,86 @@ public class HunterProfiles
 	}
 
 
+	public static ClassProfile getConnectRunnableClassProfile()
+	{
+		ClassProfile newProfile = new ClassProfile();
 
+		newProfile.setFullPath("X.1U3");
+		newProfile.setKnownPath("");
+
+		newProfile.setMinDepth(1);
+		newProfile.setMaxDepth(1);
+		newProfile.setModifiers(PUBLIC );
+
+		newProfile.setTypeParamCount(0);
+		newProfile.setSuperClass(	new ClassItem(java.lang.Object.class));
+/////////////////////////
+//Interfaces
+/////////////////////////
+		newProfile.setInterfaces(new ClassItem[]
+				{
+						new ClassItem(java.lang.Runnable.class)
+
+				});
+/////////////////////////
+//Nested Classes
+/////////////////////////
+		newProfile.setNestedClasses(new ClassItem[]
+				{
+
+				});
+/////////////////////////
+//Declared fields
+/////////////////////////
+		newProfile.setDeclaredFields(new FieldItem[]
+				{
+						new FieldItem( PUBLIC | FINAL | SYNTHETIC | EXACT , 	new ClassItem("" , PUBLIC | EXACT )),	//B
+						new FieldItem( PUBLIC | FINAL | SYNTHETIC | EXACT , 	new ClassItem(java.lang.String.class)),	//C
+						new FieldItem( PUBLIC | FINAL | SYNTHETIC | EXACT , 	new ClassItem(int.class)),	//D
+						new FieldItem( PUBLIC | FINAL | SYNTHETIC | EXACT , 	new ClassItem(int.class)),	//E
+						new FieldItem( PUBLIC | FINAL | SYNTHETIC | EXACT , 	new ClassItem(int.class)),	//F
+						new FieldItem( PUBLIC | FINAL | SYNTHETIC | EXACT , 	new ClassItem(boolean.class)),	//G
+						new FieldItem( PUBLIC | FINAL | SYNTHETIC | EXACT , 	new ClassItem(byte[].class)),	//H
+						new FieldItem( PUBLIC | STATIC | FINAL | EXACT , 	new ClassItem(java.lang.String.class)),	//__redex_internal_original_name
+
+				});
+/////////////////////////
+//Declared Methods
+/////////////////////////
+		newProfile.setDeclaredMethods(new MethodProfile[]
+				{
+						//Method #0: run
+						new MethodProfile
+								(
+										PUBLIC | FINAL | EXACT ,
+										new ClassItem(void.class)
+
+								),
+
+
+				});
+/////////////////////////
+//Declared Constructors
+/////////////////////////
+		newProfile.setDeclaredConstructors(new ConstructorProfile[]
+				{
+						//Constructor #0
+						new ConstructorProfile
+								(		PUBLIC | EXACT ,
+
+										new ClassItem("" , PUBLIC | EXACT ),
+										new ClassItem(java.lang.String.class),
+										new ClassItem(int.class),
+										new ClassItem(byte[].class),
+										new ClassItem(int.class),
+										new ClassItem(int.class),
+										new ClassItem(boolean.class)
+
+								),
+
+
+				});
+
+		return newProfile;
+	}
 }
-
-

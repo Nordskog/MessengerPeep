@@ -4,6 +4,7 @@ import android.util.Log;
 
 
 import com.mayulive.xposed.classhunter.ClassHunter;
+import com.mayulive.xposed.classhunter.ProfileCache;
 import com.mayulive.xposed.classhunter.ProfileHelpers;
 import com.mayulive.xposed.classhunter.ProfileServer;
 import com.mayulive.xposed.classhunter.packagetree.PackageTree;
@@ -17,6 +18,7 @@ import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.transport.TMemoryInputTransport;
 import org.apache.thrift.transport.TTransport;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -48,21 +50,52 @@ public class LoadPackageHook implements IXposedHookLoadPackage
 
 		if (lpparam.packageName.equals(MESSENGER_PACKAGE) )
 		{
+			XposedBridge.log(LOGTAG+", "+"Module loaded in "+lpparam.packageName);
+
+			Log.i(LOGTAG, "Module loaded in"+lpparam.packageName);
+
 			PackageTree classTree = new PackageTree(lpparam.appInfo.sourceDir, lpparam.classLoader);
-
-
 
 			//ProfileServer server = new ProfileServer(8282, classTree.getClassLoader(), classTree);
 			//server.start();
 
 
-			Profiles.init(classTree);
 
-			hookByteGenerator(classTree);
-			hookPublish(classTree);
-			hookConnect(classTree);
 
-			hookIncomingPublishRaw(classTree);
+			try
+			{
+
+				int CRC32 = ClassHunter.getApkCRC32(lpparam.appInfo.sourceDir);
+				ProfileCache.setSaveLocation(lpparam.appInfo.dataDir+"/files/MESSENGER_PEEP_CLASS_CACHE");
+
+				ClassHunter.MODULE_SIGNATURE = BuildConfig.VERSION_CODE;
+				ClassHunter.HOOK_SIGNATURE = CRC32;
+
+
+				ProfileCache.loadCache();
+
+				Profiles.init(classTree);
+
+				hookByteGenerator(classTree);
+				hookPublish(classTree);
+				hookConnect(classTree);
+
+				hookIncomingPublishRaw(classTree);
+
+				ProfileCache.saveCache();
+
+				Log.i(LOGTAG, "Finished hook setup");
+			}
+			catch ( Exception ex  )
+			{
+				Log.e(LOGTAG, "Shit hit fan");
+				Log.e(LOGTAG, ex.toString());
+				ex.printStackTrace();
+			}
+
+
+
+
 		}
 
 	}
@@ -79,19 +112,32 @@ public class LoadPackageHook implements IXposedHookLoadPackage
 
 		//Log.i(LOGTAG, "Clazz: "+clazz.toString());
 
+		/*
 		MethodProfile publishProfile = new MethodProfile(
 				NATIVE
 		);
 
 		Method method = ProfileHelpers.findFirstMatchingMethodWithName(publishProfile, clazz.getDeclaredMethods(), clazz, "publish");
+		*/
+
+
+		MethodProfile publishProfile = new MethodProfile(
+				PUBLIC|EXACT
+		);
+
+		Method method = ProfileHelpers.findFirstMatchingMethodWithName(publishProfile, clazz.getDeclaredMethods(), clazz, "publish");
+
 
 		//Log.i(LOGTAG, "publish method: "+method.toString());
+
+		Log.i(LOGTAG, "Publish class: "+clazz.toString());
+		Log.i(LOGTAG, "Publish method: "+method.toString());
 
 
 		XposedBridge.hookMethod(method, new XC_MethodHook()
 		{
 			@Override
-			protected void afterHookedMethod(MethodHookParam param) throws Throwable
+			protected void beforeHookedMethod(MethodHookParam param) throws Throwable
 			{
 				Log.i(LOGTAG, " ");
 				Log.i(LOGTAG, "############################");
@@ -137,23 +183,26 @@ public class LoadPackageHook implements IXposedHookLoadPackage
 	private static void hookConnect( PackageTree classTree ) throws Exception
 	{
 
-		Class clazz = ClassHunter.loadClass("com.facebook.proxygen.MQTTClient", classTree.getClassLoader());
+		Class clazz = ProfileHelpers.loadProfiledClass(HunterProfiles.getConnectRunnableClassProfile(), classTree);
 
-		//Log.i(LOGTAG, "Clazz: "+clazz.toString());
+		Log.i(LOGTAG, "Connect class: "+clazz.toString());
 
-		MethodProfile publishProfile = new MethodProfile(
-				NATIVE
-		);
 
-		Method method = ProfileHelpers.findFirstMatchingMethodWithName(publishProfile, clazz.getDeclaredMethods(), clazz, "connect");
+		Method method = ProfileHelpers.findFirstMethodByName(clazz.getDeclaredMethods(), "run");
 
-		//Log.i(LOGTAG, "publish method: "+method.toString());
+		Log.i(LOGTAG, "Connect method: "+method.toString());
 
+
+		Field byteArrayField = ProfileHelpers.findFirstDeclaredFieldWithType( byte[].class, clazz );
+		byteArrayField.setAccessible(true);
+
+		Field addressField = ProfileHelpers.findFirstDeclaredFieldWithType( String.class, clazz );
+		addressField.setAccessible(true);
 
 		XposedBridge.hookMethod(method, new XC_MethodHook()
 		{
 			@Override
-			protected void afterHookedMethod(MethodHookParam param) throws Throwable
+			protected void beforeHookedMethod(MethodHookParam param) throws Throwable
 			{
 				Log.i(LOGTAG, " ");
 				Log.i(LOGTAG, "############################");
@@ -163,9 +212,11 @@ public class LoadPackageHook implements IXposedHookLoadPackage
 
 				Log.i(LOGTAG, " ");
 
-				Log.i(LOGTAG, "Url: "+param.args[0].toString());
+				String url = (String) addressField.get(param.thisObject);
 
-				byte[] buffer = (byte[])param.args[2];
+				Log.i(LOGTAG, "Url: "+url);
+
+				byte[] buffer = (byte[]) byteArrayField.get(param.thisObject);
 
 				Log.i(LOGTAG, "Bytes: "+bytesToHex( buffer ));
 
@@ -203,11 +254,11 @@ public class LoadPackageHook implements IXposedHookLoadPackage
 
 		Class clazz = ProfileHelpers.loadProfiledClass(HunterProfiles.getPayloadByteWriterClassProfile(Profiles.PayloadInterfaceClass), classTree);
 
-		//Log.i(LOGTAG, "Clazz: "+clazz.toString());
+		Log.i(LOGTAG, "Payload byte writer class: "+clazz.toString());
 
 		Method method = ProfileHelpers.findAllMethodsWithReturnType( byte[].class, clazz.getDeclaredMethods() ).get(0);
 
-		//Log.i(LOGTAG, "method: "+method.toString());
+		Log.i(LOGTAG, "Payload byte writer method: "+method.toString());
 
 		XposedBridge.hookMethod(method, new XC_MethodHook()
 		{
@@ -248,6 +299,9 @@ public class LoadPackageHook implements IXposedHookLoadPackage
 
 
 		Method method = ProfileHelpers.findFirstMethodByName( clazz.getDeclaredMethods(), "onPublish" );
+
+		Log.i(LOGTAG, "ThriftClientCallback class: "+clazz.toString());
+		Log.i(LOGTAG, "ThriftClientCallback method: "+method.toString());
 
 		//Log.i(LOGTAG, "method: "+method.toString());
 
