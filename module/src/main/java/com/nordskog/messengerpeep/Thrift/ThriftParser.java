@@ -10,6 +10,7 @@ import org.apache.thrift.protocol.TSet;
 import org.apache.thrift.protocol.TType;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -246,7 +247,15 @@ public class ThriftParser
 				case 10:
 					return prot.readI64();
 				case 11:
-					return prot.readString();
+				{
+					ByteBuffer buff = prot.readBinary();
+
+					byte[] bytes = new byte[buff.remaining()];
+					buff.get(bytes, 0, buff.remaining());
+
+					return bytes;
+
+				}
 				case 12:
 				{
 					prot.readStructBegin();
@@ -262,9 +271,10 @@ public class ThriftParser
 		}
 		catch ( Exception ex )
 		{
+			ex.printStackTrace();
 			Log.i(LOGTAG, "get value problem");
 		}
 
-		return "null";
+		return null;
 	}
 }

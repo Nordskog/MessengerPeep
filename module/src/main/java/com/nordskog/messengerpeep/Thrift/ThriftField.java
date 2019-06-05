@@ -2,6 +2,9 @@ package com.nordskog.messengerpeep.Thrift;
 
 import com.nordskog.messengerpeep.StringUtils;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+
 import static com.nordskog.messengerpeep.StringUtils.INDENT;
 
 public class ThriftField
@@ -175,9 +178,17 @@ public class ThriftField
 			}
 			else if (type == 11)
 			{
+				byte[] str = (byte[]) object;
+
 				builder.append("\"");
-				builder.append( object.toString() );
+				builder.append( new String( str) );
 				builder.append("\"");
+
+				builder.append( " ( ");
+				builder.append( bytesToHex(str) );
+				builder.append( " )" );
+
+
 			}
 			else
 			{
@@ -189,4 +200,18 @@ public class ThriftField
 		return builder.toString();
 
 	}
+
+
+	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
+	public static String bytesToHex(byte[] bytes) {
+		char[] hexChars = new char[bytes.length * 2];
+		for ( int j = 0; j < bytes.length; j++ ) {
+			int v = bytes[j] & 0xFF;
+			hexChars[j * 2] = hexArray[v >>> 4];
+			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+		}
+		return new String(hexChars);
+	}
+
+
 }
