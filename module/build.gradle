@@ -15,8 +15,8 @@ android
                         applicationId 'com.nordskog.messengerpeep'
                         minSdkVersion 23
                         targetSdkVersion 26
-                        versionCode 2
-                        versionName "1.0.1"
+                        versionCode 8
+                        versionName "1.2.0"
                     }
 
 
