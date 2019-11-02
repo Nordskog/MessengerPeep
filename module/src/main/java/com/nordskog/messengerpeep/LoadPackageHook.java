@@ -264,7 +264,9 @@ public class LoadPackageHook implements IXposedHookLoadPackage
 		{
 			@Override
 			protected void afterHookedMethod(MethodHookParam param) throws Throwable
-			{					Object ret = param.args[0];
+			{
+
+				Object ret = param.args[0];
 
 				Log.i(LOGTAG, " ");
 				Log.i(LOGTAG, "############################");

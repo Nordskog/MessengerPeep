@@ -1,5 +1,7 @@
 package com.nordskog.messengerpeep;
 
+import android.util.Log;
+
 import com.mayulive.xposed.classhunter.ClassHunter;
 import com.mayulive.xposed.classhunter.ProfileHelpers;
 import com.mayulive.xposed.classhunter.packagetree.PackageEntry;
@@ -100,9 +102,17 @@ public class Profiles
 
 		///////////////////
 
+		/*
 		FieldDefinitionClass_fieldIdField = FieldDefinitionClass.getDeclaredField("B");
 		FieldDefinitionClass_nameIdField = FieldDefinitionClass.getDeclaredField("C");
 		FieldDefinitionClass_typedField = FieldDefinitionClass.getDeclaredField("D");
+		*/
+
+		Log.i("###", "Field definition class is: "+FieldDefinitionClass.toString());
+
+		FieldDefinitionClass_nameIdField = ProfileHelpers.findFirstDeclaredFieldWithType( String.class, FieldDefinitionClass);
+		FieldDefinitionClass_fieldIdField = ProfileHelpers.findFirstDeclaredFieldWithType( short.class, FieldDefinitionClass);
+		FieldDefinitionClass_typedField = ProfileHelpers.findFirstDeclaredFieldWithType( byte.class, FieldDefinitionClass);
 
 		FieldDefinitionClass_fieldIdField.setAccessible(true);
 		FieldDefinitionClass_nameIdField.setAccessible(true);
