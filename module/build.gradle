@@ -81,6 +81,7 @@ dependencies
             implementation 'com.mayulive.xposed.classhunter:classhunter:1.3.0'
             implementation 'commons-codec:commons-codec:1.8'
             implementation 'trust.nccgroup:readablethrift:1.0.0'
+            implementation 'androidx.annotation:annotation:1.0.2'
 
         }
 

@@ -1,6 +1,5 @@
 package com.nordskog.messengerpeep.Thrift;
 
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.nordskog.messengerpeep.Profiles;
@@ -10,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.Nullable;
 
 public class ThriftSearcher
 {
